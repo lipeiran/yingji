@@ -306,14 +306,30 @@ void DataTools::scale_rotate_drift_rgb(float anchor_x,float anchor_y,float rotat
 AVFrame * DataTools::sws_origin_from_frame_to_sws_frame(AVFrame *frame, int stream_index, float target_width, float target_height, AVPixelFormat target_pix_fmt, float src_width, float src_height, AVPixelFormat src_pix_fmt)
 {
     AVFrame *src_frame_yuv = av_frame_alloc();
-    unsigned char *out_buffer = (unsigned char *)av_malloc(av_image_get_buffer_size(exe_pix_fmt, target_width, target_height, 1));
-    av_image_fill_arrays(src_frame_yuv->data, src_frame_yuv->linesize, out_buffer, exe_pix_fmt, target_width, target_height, 1);
+    unsigned char *out_buffer = (unsigned char *)av_malloc(av_image_get_buffer_size(target_pix_fmt, target_width, target_height, 1));
+    av_image_fill_arrays(src_frame_yuv->data, src_frame_yuv->linesize, out_buffer, target_pix_fmt, target_width, target_height, 1);
     struct SwsContext *img_convert_ctx = sws_getContext(src_width, src_height, src_pix_fmt,target_width, target_height, target_pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
     sws_scale(img_convert_ctx, (const unsigned char* const*)frame->data, frame->linesize, 0, src_height,
               src_frame_yuv->data, src_frame_yuv->linesize);
     src_frame_yuv->width = target_width;
     src_frame_yuv->height = target_height;
-    src_frame_yuv->format = exe_pix_fmt;
+    src_frame_yuv->format = target_pix_fmt;
+    sws_freeContext(img_convert_ctx);
+    return src_frame_yuv;
+}
+
+// 将素材原始帧转换为目标帧，用于各种效果处理
+AVFrame * DataTools::sws_origin_from_frame_to_sws_pic_mask_frame(AVFrame *frame, int stream_index, float target_width, float target_height, AVPixelFormat target_pix_fmt, float src_width, float src_height, AVPixelFormat src_pix_fmt)
+{
+    AVFrame *src_frame_yuv = av_frame_alloc();
+    unsigned char *out_buffer = (unsigned char *)av_malloc(av_image_get_buffer_size(target_pix_fmt, target_width, target_height, 1));
+    av_image_fill_arrays(src_frame_yuv->data, src_frame_yuv->linesize, out_buffer, target_pix_fmt, target_width, target_height, 1);
+    struct SwsContext *img_convert_ctx = sws_getContext(src_width, src_height, src_pix_fmt,target_width, target_height, target_pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
+    sws_scale(img_convert_ctx, (const unsigned char* const*)frame->data, frame->linesize, 0, src_height,
+              src_frame_yuv->data, src_frame_yuv->linesize);
+    src_frame_yuv->width = target_width;
+    src_frame_yuv->height = target_height;
+    src_frame_yuv->format = target_pix_fmt;
     sws_freeContext(img_convert_ctx);
     return src_frame_yuv;
 }
@@ -326,21 +342,21 @@ uint8_t * DataTools::combine_mask_data_rgba(int width, int height, int linesize,
     dst_rgba_data[0] = '\0';
     int i = 0;
     int j = 0;
+    float tmpRatio = 0;
+
     for (i = 0; i < height; i++)
     {
         for (j = 0; j < width; j++)
         {
             int tmp_y = mask_rgba_data[i * mask_linesize + j];
-            float tmp_ratio = tmp_y * 1.0 / 255;
-            int tmpResult_r = src_rgba_data[i * linesize + j * 4 + 0] * tmp_ratio;
-            int tmpResult_g = src_rgba_data[i * linesize + j * 4 + 1] * tmp_ratio;
-            int tmpResult_b = src_rgba_data[i * linesize + j * 4 + 2] * tmp_ratio;
             
-            if (tmp_y != 0)
+            if (tmp_y > 16)
             {
-                dst_rgba_data[i * linesize + j * 4 + 0] = tmpResult_r * tmp_ratio;
-                dst_rgba_data[i * linesize + j * 4 + 1] = tmpResult_g * tmp_ratio;
-                dst_rgba_data[i * linesize + j * 4 + 2] = tmpResult_b * tmp_ratio;
+                tmpRatio = (tmp_y-16)*1.0/(235-16);
+                
+                dst_rgba_data[i * linesize + j * 4 + 0] = src_rgba_data[i * linesize + j * 4 + 0] * tmpRatio;
+                dst_rgba_data[i * linesize + j * 4 + 1] = src_rgba_data[i * linesize + j * 4 + 1] * tmpRatio;
+                dst_rgba_data[i * linesize + j * 4 + 2] = src_rgba_data[i * linesize + j * 4 + 2] * tmpRatio;
                 dst_rgba_data[i * linesize + j * 4 + 3] = 255;
             }
             else
@@ -350,6 +366,31 @@ uint8_t * DataTools::combine_mask_data_rgba(int width, int height, int linesize,
                 dst_rgba_data[i * linesize + j * 4 + 2] = green[2];
                 dst_rgba_data[i * linesize + j * 4 + 3] = 0;
             }
+
+            
+            
+    
+
+
+//            float tmp_ratio = tmp_y * 1.0 / 255;
+//            int tmpResult_r = src_rgba_data[i * linesize + j * 4 + 0] * tmp_ratio;
+//            int tmpResult_g = src_rgba_data[i * linesize + j * 4 + 1] * tmp_ratio;
+//            int tmpResult_b = src_rgba_data[i * linesize + j * 4 + 2] * tmp_ratio;
+//
+//            if (tmp_y != 0)
+//            {
+//                dst_rgba_data[i * linesize + j * 4 + 0] = tmpResult_r * tmp_ratio;
+//                dst_rgba_data[i * linesize + j * 4 + 1] = tmpResult_g * tmp_ratio;
+//                dst_rgba_data[i * linesize + j * 4 + 2] = tmpResult_b * tmp_ratio;
+//                dst_rgba_data[i * linesize + j * 4 + 3] = 255;
+//            }
+//            else
+//            {
+//                dst_rgba_data[i * linesize + j * 4 + 0] = green[0];
+//                dst_rgba_data[i * linesize + j * 4 + 1] = green[1];
+//                dst_rgba_data[i * linesize + j * 4 + 2] = green[2];
+//                dst_rgba_data[i * linesize + j * 4 + 3] = 0;
+//            }
         }
     }
     return dst_rgba_data;

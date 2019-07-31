@@ -65,6 +65,9 @@ public:
     // 将素材原始帧转换为目标帧，用于各种效果处理
     static AVFrame *sws_origin_from_frame_to_sws_frame(AVFrame *frame, int stream_index, float target_width, float target_height, AVPixelFormat target_pix_fmt, float src_width, float src_height, AVPixelFormat src_pix_fmt);
     
+    AVFrame *sws_origin_from_frame_to_sws_pic_mask_frame(AVFrame *frame, int stream_index, float target_width, float target_height, AVPixelFormat target_pix_fmt, float src_width, float src_height, AVPixelFormat src_pix_fmt);
+
+    
     // 合并mask和原素材
     static uint8_t * combine_mask_data_rgba(int width, int height, int linesize, uint8_t *src_rgba_data, int mask_linesize, uint8_t *mask_rgba_data);
     

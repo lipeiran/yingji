@@ -798,13 +798,9 @@ int main(int argc, char *argv[])
             int m = atoi(mask_ref_id_path[i]);
             
             mask_dst_frame[i] = read_frame_from_formatContext(0);
-            mask_two_dst_frame[i] = dataTools.sws_origin_from_frame_to_sws_frame(mask_dst_frame[i], 0, configEntity.assets[m].w, configEntity.assets[m].h, exe_pix_fmt, src_stream_ctx[0].dec_ctx->width, src_stream_ctx[0].dec_ctx->height, src_stream_ctx[0].dec_ctx->pix_fmt);
-            uint8_t *yuvData[3] = {NULL};
-            int yuvStride[3] = {0};
-            
-            dataTools.rgba_to_yuv_libyuv(mask_two_dst_frame[i]->data[0], yuvData, mask_two_dst_frame[i]->linesize, yuvStride, mask_two_dst_frame[i]->width, mask_two_dst_frame[i]->height);
-            
-            tmp_result_data = dataTools.combine_mask_data_rgba(mask_two_dst_frame[i]->width, mask_two_dst_frame[i]->height, rgb_linesize_a[m], cp_layer_target_frame[m][0], yuvStride[0],yuvData[0]);
+            mask_two_dst_frame[i] = dataTools.sws_origin_from_frame_to_sws_pic_mask_frame(mask_dst_frame[i], 0, configEntity.assets[m].w, configEntity.assets[m].h, enc_pix_fmt, src_stream_ctx[0].dec_ctx->width, src_stream_ctx[0].dec_ctx->height, src_stream_ctx[0].dec_ctx->pix_fmt);
+    
+            tmp_result_data = dataTools.combine_mask_data_rgba(mask_two_dst_frame[i]->width, mask_two_dst_frame[i]->height, rgb_linesize_a[m], cp_layer_target_frame[m][0], mask_two_dst_frame[i]->linesize[0],mask_two_dst_frame[i]->data[0]);
             
             cp_mask_layer_target_frame[i] = (uint8_t **)av_mallocz_array(1, sizeof(uint8_t *));
             cp_mask_layer_target_frame[i][0] = tmp_result_data;
@@ -1352,16 +1348,16 @@ write_end:
     ret = flush_encoder(0);
     av_write_trailer(ofmt_ctx); // 写文件尾，对于某些没有文件头的封装格式，不需要此函数，比如MPEG2TS
 end:
-//    av_frame_free(&dst_frame);
+    av_frame_free(&dst_frame);
     avformat_close_input(&ifmt_ctx);
     avformat_close_input(&ifmt_two_ctx);
-//    avcodec_free_context(&src_stream_ctx[0].enc_ctx);
+    avcodec_free_context(&src_stream_ctx[0].enc_ctx);
     
     if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
     {
         avio_closep(&ofmt_ctx->pb);
     }
-//    av_free(src_stream_ctx);
+    av_free(src_stream_ctx);
 
     log.print_ms("  end");
 

@@ -63,7 +63,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "   --bgimage=/Users/lipeiran/Desktop/FFmpeg_lipeiran/FFTest/FFTest/test0.jpeg --config=/Users/lipeiran/Downloads/7_17_test/tapai_model_7_17/wy_srxc/tp.json --mask=\&quot;/Users/lipeiran/Downloads/7_17_test/tapai_model_7_17/wy_srxc/tp_fg.mp4^/Users/lipeiran/Downloads/7_17_test/tapai_model_7_17/wy_srxc/tp_mask.mp4\&quot; --images=\&quot;/Users/lipeiran/Downloads/7_17_test/tapai_model_7_17/wy_srxc/images/img_0.png^/Users/lipeiran/Downloads/7_17_test/tapai_model_7_17/wy_srxc/images/img_1.png^/Users/lipeiran/Downloads/7_17_test/tapai_model_7_17/wy_srxc/images/img_2.png^/Users/lipeiran/Downloads/7_17_test/tapai_model_7_17/wy_srxc/images/img_3.png^/Users/lipeiran/Downloads/7_17_test/tapai_model_7_17/wy_srxc/images/img_4.png\&quot; --out=/Users/lipeiran/Downloads/7_17_test/tapai_result_7_17/wy_srxc.mp4"
+            argument = "  --bgimage=/Users/lipeiran/Desktop/weixing/3D/finish/test0.jpeg --config=/Users/lipeiran/Desktop/weixing/3D/finish/tp.json --mask=\&quot;/Users/lipeiran/Desktop/weixing/3D/finish/tp_fg.mp4^/Users/lipeiran/Desktop/weixing/3D/finish/tp_mask.mp4\&quot; --images=\&quot;/Users/lipeiran/Desktop/weixing/3D/finish/images/img_0.png\&quot; --out=/Users/lipeiran/Desktop/weixing/3D/finish/result.mp4 --debug=1"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
